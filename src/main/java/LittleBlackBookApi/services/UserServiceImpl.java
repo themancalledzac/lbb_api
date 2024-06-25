@@ -2,6 +2,7 @@ package LittleBlackBookApi.services;
 
 import LittleBlackBookApi.entity.UserEntity;
 import LittleBlackBookApi.model.UserModel;
+import LittleBlackBookApi.model.createNewContact;
 import LittleBlackBookApi.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,40 +21,66 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserModel getUserByUsername(String username) {
-        Optional<UserEntity> userEntity = userRepository.findByUsername(username);
+    public UserModel getUserByUuid(String uuid) {
+        Optional<UserEntity> userEntity = userRepository.findByUuid(UUID.fromString(uuid));
         UserModel userModel = new UserModel();
-        userModel.setName(userEntity.get().getName());
-        userModel.setUsername(userEntity.get().getUsername());
-        userModel.setUuid(userEntity.get().getUuid());
+        userModel.setFirstName(userEntity.get().getFirstName());
+        userModel.setLastName(userEntity.get().getLastName());
+        userModel.setUuid(String.valueOf(userEntity.get().getUuid()));
         userModel.setContactList(userEntity.get().getContactList().stream()
-                .map(contact -> new UserModel(contact.getUuid(), contact.getName(), contact.getUsername(), null))
+                .map(contact -> new UserModel(contact.getUuid(), contact.getFirstName(), contact.getLastName(), contact.getPhoneNumber(), contact.getEmail()))
                 .collect(Collectors.toList()));
         return userModel;
     }
 
     @Override
     public UserModel createUser(UserModel user) {
-        Optional<UserEntity> userEntity = userRepository.createUser(user);
+        UserEntity userEntity = userRepository.createUser(user);
         UserModel userModel = new UserModel();
-        userModel.setName(userEntity.get().getName());
-        userModel.setUsername(userEntity.get().getUsername());
-        userModel.setUuid(userEntity.get().getUuid());
+        userModel.setFirstName(userEntity.getFirstName());
+        userModel.setLastName(userEntity.getLastName());
+        userModel.setUuid(String.valueOf(userEntity.getUuid()));
+        userModel.setPhoneNumber(userEntity.getPhoneNumber());
+        userModel.setEmail(userEntity.getEmail());
         return userModel;
     }
 
     @Override
-    public void addContact(UUID userUuid, UUID contactUuid) {
-        Optional<UserEntity> userEntity = userRepository.findById(userUuid);
-        Optional<UserEntity> contactEntity = userRepository.findById(contactUuid);
+    public UserModel createAndAddContact(createNewContact createNewContact) {
 
-        if (userEntity.isPresent() && contactEntity.isPresent()) {
-            UserEntity user = userEntity.get();
-            UserEntity contact = contactEntity.get();
-            user.getContactList().add(contact);
-            userRepository.save(user);
-        } else {
-            throw new RuntimeException("User or Contact not found");
+        // create contact User
+        UserModel newContactUser = new UserModel();
+        newContactUser.setFirstName(createNewContact.getContactFirstName());
+        newContactUser.setLastName(createNewContact.getContactLastName());
+        newContactUser.setEmail(createNewContact.getContactEmail());
+        newContactUser.setPhoneNumber(createNewContact.getContactPhoneNumber());
+
+        // Persist new contact user
+        UserEntity newContactEntity = userRepository.createUser(newContactUser);
+
+        // Ensure new contact is fully populated by fetching it from the database
+        UserEntity savedContactEntity = userRepository.findById(newContactEntity.getUuid()).orElseThrow(() -> new RuntimeException("New contact not found"));
+
+        // Add Contact to Our User
+        Optional<UserEntity> userEntity = userRepository.findById(createNewContact.getUserUuid());
+        if (userEntity.isEmpty()) {
+            throw new RuntimeException("User not found");
         }
+        UserEntity currentUser = userEntity.get();
+        currentUser.getContactList().add(savedContactEntity);
+        userRepository.save(currentUser);
+
+        // Return updated user
+        UserModel returnedCurrentUser = new UserModel();
+        returnedCurrentUser.setFirstName(currentUser.getFirstName());
+        returnedCurrentUser.setLastName(currentUser.getLastName());
+        returnedCurrentUser.setUuid(String.valueOf(currentUser.getUuid()));
+        returnedCurrentUser.setPhoneNumber(currentUser.getPhoneNumber());
+        returnedCurrentUser.setEmail(currentUser.getEmail());
+        returnedCurrentUser.setContactList(currentUser.getContactList().stream()
+                .map(contact -> new UserModel(String.valueOf(contact.getUuid()), contact.getFirstName(), contact.getLastName(), contact.getPhoneNumber(), contact.getEmail()))
+                .collect(Collectors.toList()));
+
+        return returnedCurrentUser;
     }
 }

@@ -34,9 +34,10 @@ public class UserEntity {
             strategy = "org.hibernate.id.UUIDGenerator"
     )
     private UUID uuid;
-    private String name;
-    private String username;
-    private String password;
+    private String firstName;
+    private String lastName;
+    private String phoneNumber;
+    private String email;
 
     @ManyToMany
     private List<UserEntity> contactList;

@@ -10,11 +10,16 @@ import java.util.UUID;
 @Data
 public class UserModel {
 
-    private UUID uuid;
-    private String name;
-    private String username;
+    private String uuid;
+    private String firstName;
+    private String lastName;
+    private String phoneNumber;
+    private String email;
     private List<UserModel> contactList;
 
-    public UserModel(UUID uuid, String name, String username, Object o) {
+    public UserModel(String uuid, String firstName, String lastName, String phoneNumber, String email) {
+    }
+
+    public UserModel(UUID uuid, String firstName, String lastName, String phoneNumber, String email) {
     }
 }
