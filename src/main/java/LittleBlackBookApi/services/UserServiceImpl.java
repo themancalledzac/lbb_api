@@ -1,6 +1,7 @@
 package LittleBlackBookApi.services;
 
 import LittleBlackBookApi.entity.UserEntity;
+import LittleBlackBookApi.model.CreateUserModel;
 import LittleBlackBookApi.model.UserModel;
 import LittleBlackBookApi.model.createNewContact;
 import LittleBlackBookApi.repository.UserRepository;
@@ -8,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -21,8 +21,31 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserModel createUser(CreateUserModel user) {
+        UserEntity userEntity = new UserEntity();
+        userEntity.setFirstName(user.getFirstName());
+        userEntity.setLastName(user.getLastName());
+        userEntity.setPhoneNumber(user.getPhoneNumber());
+        userEntity.setEmail(user.getEmail());
+
+        UserEntity savedUser = userRepository.save(userEntity);
+
+        return mapToUserModel(savedUser);
+    }
+
+    public UserModel mapToUserModel(UserEntity user) {
+        UserModel userModel = new UserModel();
+        userModel.setFirstName(user.getFirstName());
+        userModel.setLastName(user.getLastName());
+        userModel.setUuid(String.valueOf(user.getUuid()));
+        userModel.setPhoneNumber(user.getPhoneNumber());
+        userModel.setEmail(user.getEmail());
+        return userModel;
+    }
+
+    @Override
     public UserModel getUserByUuid(String uuid) {
-        Optional<UserEntity> userEntity = userRepository.findByUuid(UUID.fromString(uuid));
+        Optional<UserEntity> userEntity = userRepository.findByUuid(uuid);
         UserModel userModel = new UserModel();
         userModel.setFirstName(userEntity.get().getFirstName());
         userModel.setLastName(userEntity.get().getLastName());
@@ -30,18 +53,6 @@ public class UserServiceImpl implements UserService {
         userModel.setContactList(userEntity.get().getContactList().stream()
                 .map(contact -> new UserModel(contact.getUuid(), contact.getFirstName(), contact.getLastName(), contact.getPhoneNumber(), contact.getEmail()))
                 .collect(Collectors.toList()));
-        return userModel;
-    }
-
-    @Override
-    public UserModel createUser(UserModel user) {
-        UserEntity userEntity = userRepository.createUser(user);
-        UserModel userModel = new UserModel();
-        userModel.setFirstName(userEntity.getFirstName());
-        userModel.setLastName(userEntity.getLastName());
-        userModel.setUuid(String.valueOf(userEntity.getUuid()));
-        userModel.setPhoneNumber(userEntity.getPhoneNumber());
-        userModel.setEmail(userEntity.getEmail());
         return userModel;
     }
 

@@ -1,5 +1,6 @@
 package LittleBlackBookApi.controller;
 
+import LittleBlackBookApi.model.CreateUserModel;
 import LittleBlackBookApi.model.UserModel;
 import LittleBlackBookApi.model.createNewContact;
 import LittleBlackBookApi.services.UserService;
@@ -27,15 +28,16 @@ public class UserController {
 
     private final UserService userService;
 
+    @PostMapping("/createUser")
+    public UserModel createUser(@RequestBody CreateUserModel user) {
+        return userService.createUser(user);
+    }
+
     @GetMapping("/getUser/{uuid}")
     public UserModel getUser(@PathVariable("uuid") String uuid) {
         return userService.getUserByUuid(uuid);
     }
 
-    @PostMapping("/createUser")
-    public UserModel createUser(@RequestBody UserModel user) {
-        return userService.createUser(user);
-    }
 
     @PostMapping("/createAndAddContact")
     public UserModel createAndAddContact(@RequestBody createNewContact createNewContact) {

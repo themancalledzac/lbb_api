@@ -1,12 +1,13 @@
 package LittleBlackBookApi.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +16,6 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -23,23 +23,24 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "users", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"name", "username"})
-})
+@Table(name = "users")
 public class UserEntity {
     @Id
     @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
-    private UUID uuid;
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "uuid", updatable = false, nullable = false, length = 36)
+    private String uuid;
     private String firstName;
     private String lastName;
     private String phoneNumber;
     private String email;
 
     @ManyToMany
+    @JoinTable(
+            name = "user_contacts",
+            joinColumns = @JoinColumn(name = "user_uuid"),
+            inverseJoinColumns = @JoinColumn(name = "contact_uuid")
+    )
     private List<UserEntity> contactList;
 
 }

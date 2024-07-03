@@ -9,7 +9,7 @@ import java.util.UUID;
 @Data
 public class createNewContact {
 
-    private UUID userUuid;
+    private String userUuid;
     private String contactFirstName;
     private String contactLastName;
     private String contactPhoneNumber;
