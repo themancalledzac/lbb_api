@@ -12,7 +12,7 @@ public interface UserService {
 
     UserModel createUser(CreateUserModel user);
 
-//    void addContact(UUID userUuid, UUID contactUuid);
-
     UserModel createAndAddContact(createNewContact createNewContact);
+
+    UserModel updateUser(UserModel user);
 }

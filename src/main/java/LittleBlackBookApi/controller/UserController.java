@@ -38,6 +38,11 @@ public class UserController {
         return userService.getUserByUuid(uuid);
     }
 
+    @PostMapping("/updateUser/")
+    public UserModel updateUser(@RequestBody UserModel user) {
+        return userService.updateUser(user);
+    }
+
 
     @PostMapping("/createAndAddContact")
     public UserModel createAndAddContact(@RequestBody createNewContact createNewContact) {
